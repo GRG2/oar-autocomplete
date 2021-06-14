@@ -1,0 +1,9 @@
+data/*
+old/*
+.vscode
+.ipynb_checkpoints
+__pycache__
+big.txt
+short.txt
+small.csv
+test.py
