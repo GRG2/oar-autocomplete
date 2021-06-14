@@ -1,0 +1,148 @@
+<html>
+
+<head>
+    <title>NIST PDR Search</title>
+    <style>
+        * {
+            padding: 0px;
+            margin: 0px
+        }
+
+        h1 {
+            text-align: center;
+            margin: 10px;
+            font-size: 64px;
+        }
+
+        #search_box {
+            width: 100%;
+            border: 0px;
+            border-bottom: 2px solid rgb(54, 54, 54);
+            border-radius: 5px;
+            border-bottom-left-radius: 0px;
+            border-bottom-right-radius: 0px;
+            background-color: rgb(233, 233, 233);
+        }
+
+        #search_area {
+            margin-left: auto;
+            margin-right: auto;
+            width: 80%;
+            border: 2px solid black;
+            border-radius: 5px;
+            background-color: rgb(240, 251, 252);
+        }
+
+        #q {
+            width: 88%;
+            outline: 0px;
+            border: 0px;
+            font-size: 36px;
+            background-color: rgb(233, 233, 233);
+        }
+
+        #search_button {
+            font-size: 36px;
+            border: 0px;
+            outline: 0px;
+            background-color: rgb(233, 233, 233);
+        }
+
+        #search_button:hover {
+            cursor: pointer;
+            background-color: aqua;
+        }
+
+        #search_results {
+            width: 100%;
+            border: 0px;
+        }
+
+        p {
+            margin: 2px;
+        }
+
+        a {
+            text-decoration: none;
+            color: black;
+        }
+
+        p:hover {
+            background-color: aqua;
+        }
+
+        .results {
+            font-size: 36px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>NIST PDR Search</h1>
+    <div id="search_area">
+        <div id="search_box">
+            <form autocomplete="off" onsubmit="return false;">
+                <label for="q"></label>
+                <input type="text" list="search_results" id="q" name="q" placeholder="Enter search terms here...">
+                <button type="submit" id="search_button" value="Submit" onclick="redirect();">Search</button>
+            </form>
+        </div>
+        <div id="search_results"></div>
+    </div>
+</body>
+<script>
+    document.getElementById("q").addEventListener("keydown",
+        function check_enter(e) {
+            if (e.keyCode == 13) {
+                redirect();
+            }
+        });
+
+    function redirect() {
+        q = document.getElementById("q").value;
+        window.location.href = "https://data.nist.gov/sdp/#/search?q=" + q;
+    }
+
+    function fill_results(array, list) {
+        for (var i = 0; i < array.length; i++) {
+            var item = document.createElement('a');
+            item.className = 'results';
+            var subitem = document.createElement('p');
+            subitem.appendChild(document.createTextNode(array[i][0]));
+            item.appendChild(subitem);
+            list.appendChild(item);
+            item.href = "https://data.nist.gov/sdp/#/search?q=" + array[i][0];
+        }
+    }
+
+    function removeChildren(parent) {
+        while (parent.firstChild) {
+            parent.removeChild(parent.firstChild);
+        }
+    }
+
+    oldterms = "";
+    old_finished = true;
+    update = setInterval(function () {
+        terms = document.getElementById("q").value;
+        if (terms != oldterms && old_finished) {
+            old_finished = false;
+            var req = new XMLHttpRequest();
+            req.open("GET", "http://localhost:8000/" + terms, true);
+            req.onload = function (e) {
+                response = JSON.parse(req.responseText);
+                search_results = document.getElementById("search_results");
+                removeChildren(search_results);
+                fill_results(response, search_results)
+                old_finished = true;
+            }
+            req.onerror = function (e) {
+                console.error(xhr.statusText)
+            }
+            req.send(null);
+            oldterms = terms;
+        }
+    }, 16);
+</script>
+
+</html>
