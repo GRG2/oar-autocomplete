@@ -1,26 +1,13 @@
 import multiprocessing as mp
-import pandas
 import json
 from difflib import SequenceMatcher
-import os
 
 try:
     import regex as re
 except:
     import re
 
-results = pandas.read_csv("parmenides_results.csv")
-print("Results:", len(results))
-splits = []
-num_splits = max(os.cpu_count(), mp.cpu_count())
-len_results = len(results)
 
-for i in range(num_splits):
-    start = int(i * len_results / num_splits)
-    end = int((i + 1) * len_results / num_splits)
-    splits.append(results[start:end])
-
-THRESHOLD = 0.3
 
 # https://stackoverflow.com/a/17388505 "Find the similarity metric between two strings"
 # I figured this would be worth a shot instead of using cosine similarity
@@ -44,7 +31,8 @@ def match_terms(a, b, threshold):
     return matches / max(len(words_a), len(words_b))
 
 
-def search_helper(phrase, max_values, threshold, dataset, q):
+def search_helper(arguments):
+    dataset, phrase, max_values, threshold = arguments
     similarity_matrix = {}
     for index, row in dataset.iterrows():
         comparison_terms = row["TERM_REDUCED"].lower().strip()
@@ -68,27 +56,14 @@ def search_helper(phrase, max_values, threshold, dataset, q):
     return_values = sorted_similarity_matrix[:max_values]
 
     return_values = filter(lambda value: value[1] >= threshold, return_values)
-    q.put(list(return_values))
+    return(list(return_values))
 
 
-def search_json(phrase, max_values=10, threshold=THRESHOLD):
+def search_json(phrase, splits, p, max_values=10, threshold=0.5):
     rv = []
-    processes = []
-    q = mp.Queue()
-    for dataset in splits:
-        processes.append(
-            mp.Process(
-                target=search_helper, args=(phrase, max_values, threshold, dataset, q)
-            )
-        )
-    for p in processes:
-        p.start()
 
-    return_values = []
-
-    for p in processes:
-        p.join()
-        return_values += q.get()
+    return_values = p.map(search_helper, [(split, phrase, max_values, threshold) for split in splits])
+    return_values = [item for sublist in return_values for item in sublist]
 
     return_values = sorted(return_values, key=lambda item: item[1], reverse=True)
 
