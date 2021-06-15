@@ -28,4 +28,4 @@ Parmenides is required for generating the dataset seen in `parmenides_results.cs
 
 `python -m parmenides -s settings.py -o parmenides_results.csv data/*`
 
-After this point, the Python server can be run and accessed from `localhost:8000/?q=<search_terms>`
+After this point, the Python server can be run and accessed from `localhost:8000/<search_terms>`
