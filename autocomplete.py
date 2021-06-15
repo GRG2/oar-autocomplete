@@ -73,12 +73,15 @@ def search_helper(arguments):
     )
 
     # Filter out matches below the threshold, then return only the number of values we want
-    return_values = filter(lambda value: value[1] >= threshold, similarity_matrix)
+    return_values = list(filter(lambda value: value[1] >= threshold, similarity_matrix))
     return_values = return_values[:max_values]
 
     return list(return_values)
 
-
+'''
+Boilerplate code which handles splitting the search between processes in the processing pool.
+returns: JSON formatted 2D list of strings and floating point numbers between 0 and 1
+'''
 def search_json(phrase, splits, p, max_values=10, threshold=0.5):
     if (len(phrase) == 0):
         return json.dumps([])
