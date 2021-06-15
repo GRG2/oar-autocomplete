@@ -24,8 +24,16 @@ Server functionality, as well as initial setup, is included in `server.py`, whil
 
 # Generating a dataset
 
-Parmenides is required for generating the dataset seen in `parmenides_results.csv`. The data itself comes from the [NIST SDP web API](https://data.nist.gov/rmm/records), the output of which can be seen in `nerdm.json`. After extracting the titles, themes, keywords, descriptions, and topics of each document in the nerdm JSON, they can be parsed by Parmenides.
+Parmenides is required for generating the dataset seen in `parmenides_results.csv`. The data itself comes from the [NIST SDP web API](https://data.nist.gov/rmm/records), the output of which can be seen in `nerdm.json`. After extracting the titles, themes, keywords, descriptions, and topics of each document in the nerdm JSON, they can be parsed by Parmenides. The JSONSource extension is responsible for parsing the JSON file inside of Parmenides.
 
-`python -m parmenides -s settings.py -o parmenides_results.csv data/*`
+`python -m parmenides -s settings.py -o parmenides_results.csv nerdm.json ResultData`
 
 After this point, the Python server can be run and accessed from `localhost:8000/<search_terms>`
+
+To summarize:
+
+`curl -X GET "https://data.nist.gov/rmm/records" -H "accept: application/json" > nerdm.json`
+
+`python -m parmenides -s settings.py -o parmenides_results.csv nerdm.json ResultData`
+
+`python server.py`
