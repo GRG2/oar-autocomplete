@@ -13,7 +13,8 @@ class JSONSource(DocumentSource):
         if len(arguments) > 1:
             json_starters = arguments[1:]
         with open(filename, "r", encoding="utf-8") as fp:
-            cls.json_obj = json.load(fp)
+            text = fp.read().encode("latin-1", errors="ignore").decode("utf-8", errors="ignore")
+            cls.json_obj = json.loads(text)
             cls.estimate = len(cls.json_obj)
         for code in json_starters:
             cls.json_obj = cls.json_obj[code]
