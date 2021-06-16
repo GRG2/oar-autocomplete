@@ -23,6 +23,7 @@ class ExpandedWriter(Writer):
             'TERM_REDUCED',
             'PHRASE',
             'DOCUMENT',
+            'FREQ'
         ] + settings.CSV_EXTRA_COLUMNS
 
         self.outfile = open(output, 'w', encoding=settings.ENCODING,
@@ -44,7 +45,8 @@ class ExpandedWriter(Writer):
     def write(self, document, trees):
 
         collected_terms = {}
-        
+        freq = {}
+
         for tree in trees:
             term = tree.term
             if term.representation in collected_terms:
@@ -53,8 +55,14 @@ class ExpandedWriter(Writer):
             else:
                 term.sentence = str(tree)
                 collected_terms[term.representation] = term
-
+            if term.representation in freq:
+                freq[term.representation] += 1
+            else:
+                freq[term.representation] = 1
+        
         for representation, term in collected_terms.items():
+            if freq[representation] < 2:
+                continue
             words = str(list(term.phrases)[0]).split()
             if len(words) > MAX_TERMS:
                 continue
@@ -65,11 +73,13 @@ class ExpandedWriter(Writer):
                     break
             if skip:
                 continue
+            
             row = {
                 'TERM': representation,
                 'TERM_REDUCED': " ".join(list(set(re.split(r':\d:', str(representation))))),
                 'PHRASE': self.remove_unwanted(str(list(term.phrases)[0])),
                 'DOCUMENT': document.identifier,
+                'FREQ': freq[representation]
             }
             for column_name in settings.CSV_EXTRA_COLUMNS:
                 row[column_name] = document.metadata.get(column_name)
