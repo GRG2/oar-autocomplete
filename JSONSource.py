@@ -21,7 +21,17 @@ class JSONSource(DocumentSource):
     @classmethod
     def get_documents(cls, filenames):
         for document in cls.json_obj:
-            sections = [Section(name="Main", content=document["description"][0])]
+            sections = [
+                Section(name="Description", content=" ".join(document["description"])),
+                Section(name="Keywords", content=". ".join(document["keyword"])),
+                Section(name="Title", content=document["title"])
+            ]
+            topics = []
+            for topic in document["topic"]:
+                topics.append(topic["tag"])
+            sections.append(Section(name="Topics", content=". ".join(topics)))
+            if "theme" in document.keys():
+                sections.append(Section(name="Theme", content=". ".join(document["theme"])))
             title = document["title"]
 
             yield Document(
