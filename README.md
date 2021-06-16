@@ -18,7 +18,7 @@ Server functionality, as well as initial setup, is included in `server.py`, whil
 # Prerequisites
 
 |[pandas](https://pypi.org/project/pandas/) | `pip install pandas`|
-| --- | :--- |
+| :---: | :--- |
 |[parmenides](https://gitlab.nist.gov/gitlab/jacob.collard/parmenides) | `git clone https://gitlab.nist.gov/gitlab/jacob.collard/parmenides.git; pip install -e parmenides`
 |[spacy](https://pypi.org/project/spacy/) | `pip install spacy; python -m spacy download en_core_web_sm` |
 
