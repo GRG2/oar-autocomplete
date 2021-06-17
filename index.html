@@ -59,6 +59,14 @@
             border: 0px;
         }
 
+        .results_text {
+            flex: 5;
+        }
+
+        .results_num {
+            flex: 1;
+        }
+
         p {
             margin: 2px;
         }
@@ -74,6 +82,8 @@
 
         .results {
             font-size: 36px;
+            width: 100%;
+            display: flex;
         }
     </style>
 </head>
@@ -104,15 +114,48 @@
         window.location.href = "https://data.nist.gov/sdp/#/search?q=" + q;
     }
 
+    function rgb(r, g, b) {
+        return `rgb(${r}, ${g}, ${b})`
+    }
+
     function fill_results(array, list) {
         for (var i = 0; i < array.length; i++) {
-            var item = document.createElement('a');
-            item.className = 'results';
-            var subitem = document.createElement('p');
-            subitem.appendChild(document.createTextNode(array[i][0]));
-            item.appendChild(subitem);
-            list.appendChild(item);
-            item.href = "https://data.nist.gov/sdp/#/search?q=" + array[i][0];
+            var link = document.createElement('a');
+            var div = document.createElement('div');
+            
+            var text_div = document.createElement('div');
+            text_div.setAttribute("class", 'results_text');
+            var sim_div = document.createElement('div');
+            sim_div.setAttribute("class", 'results_num');
+            var freq_div = document.createElement('div');
+            freq_div.setAttribute("class", 'results_num');
+            
+            var text = document.createElement('p');
+            var sim = document.createElement('p');
+            var freq = document.createElement('p');
+
+            text.appendChild(document.createTextNode(array[i][0]));
+            sim.appendChild(document.createTextNode(Math.round(array[i][1]['similarity']*100) + "%"));
+            freq.appendChild(document.createTextNode(Math.round(array[i][1]['data']['FREQ'])));
+
+            text_div.appendChild(text);
+            sim_div.appendChild(sim);
+            freq_div.appendChild(freq);
+
+            div.appendChild(text_div);
+            div.appendChild(sim_div);
+            div.appendChild(freq_div);
+
+            div.setAttribute("class", "results");
+
+            link.appendChild(div);
+
+            link.href = "https://data.nist.gov/sdp/#/search?q=" + array[i][0];
+
+            sim_div.style.backgroundColor = rgb(255*array[i][1]["similarity"], 100, 100);
+            freq_div.style.backgroundColor = rgb(100, 255 - 50*array[i][1]["data"]["FREQ"], 100);
+
+            list.appendChild(link);
         }
     }
 
