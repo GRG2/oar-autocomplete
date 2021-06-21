@@ -12,7 +12,7 @@ chars_to_remove = ['.', ',', ';', '!', '?', '[', ']', '{', '}']
 chars_to_replace_with_space = ['_', '/', r'\s+', ':']
 
 
-MAX_TERMS = 5
+MAX_TERMS = 3
 
 class ExpandedWriter(Writer):
 
@@ -75,9 +75,9 @@ class ExpandedWriter(Writer):
                 continue
             
             row = {
-                'TERM': representation,
-                'TERM_REDUCED': " ".join(list(set(re.split(r':\d:', str(representation))))),
-                'PHRASE': self.remove_unwanted(str(list(term.phrases)[0])),
+                'TERM': str(representation).lower().strip(),
+                'TERM_REDUCED': " ".join(list(set(re.split(r':\d:', str(representation))))).lower().strip(),
+                'PHRASE': self.remove_unwanted(str(list(term.phrases)[0])).lower().strip(),
                 'DOCUMENT': document.identifier,
                 'FREQ': freq[representation]
             }
