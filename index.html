@@ -186,9 +186,9 @@
 
             link.href = "https://data.nist.gov/sdp/#/search?q=" + array[i][0];
 
-            sim_div.style.backgroundColor = rgb(255 * array[i][1]["similarity"], 100, 100);
-            freq_div.style.backgroundColor = rgb(100, 25 * array[i][1]["data"]["FREQ"], 100);
-            rank_div.style.backgroundColor = rgb(100, 100, 25 * array[i][1]["rank"]);
+            sim_div.style.backgroundColor = rgb(100 + 155 * array[i][1]["similarity"], 100, 100);
+            freq_div.style.backgroundColor = rgb(100, 100 + 25 * array[i][1]["data"]["FREQ"], 100);
+            rank_div.style.backgroundColor = rgb(100, 100, 100 + 25 * array[i][1]["rank"]);
 
             list.appendChild(link);
         }
