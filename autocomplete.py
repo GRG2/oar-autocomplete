@@ -70,29 +70,25 @@ def search_helper(arguments):
             similar(phrase, comparison_phrase),
         )
         # Safeguard in case the phrase has already been seen before
-        if comparison_phrase in similarity_matrix.keys():
-            # similarity_matrix[comparison_phrase] = max(
-            #     similarity_matrix[comparison_phrase], similarity
-            # )
-            matrix_entry = similarity_matrix[comparison_phrase]
-            if similarity > matrix_entry["similarity"]:
-                similarity_matrix[comparison_phrase] = {
-                    "similarity": similarity,
-                    "data": dict(row),
-                }
-        else:
+        if (
+            not comparison_phrase in similarity_matrix.keys()
+        ) or similarity > similarity_matrix[comparison_phrase]["similarity"]:
+
             similarity_matrix[comparison_phrase] = {
                 "similarity": similarity,
                 "data": dict(row),
+                "rank": (similarity ** 3) * row["FREQ"],
             }
 
     # Sort the similarity matrix from highest to lowest
     similarity_matrix = sorted(
-        similarity_matrix.items(), key=lambda item: item[1]["similarity"], reverse=True
+        similarity_matrix.items(), key=lambda item: item[1]["rank"], reverse=True
     )
 
     # Filter out matches below the threshold, then return only the number of values we want
-    return_values = list(filter(lambda value: value[1]["similarity"] >= threshold, similarity_matrix))
+    return_values = list(
+        filter(lambda value: value[1]["similarity"] >= threshold, similarity_matrix)
+    )
     return_values = return_values[:max_values]
 
     return list(return_values)
@@ -115,7 +111,9 @@ def search_json(phrase, splits, p, max_values=10, threshold=0.5):
     )
     return_values = [item for sublist in return_values for item in sublist]
 
-    return_values = sorted(return_values, key=lambda item: item[1]["similarity"], reverse=True)
+    return_values = sorted(
+        return_values, key=lambda item: item[1]["rank"], reverse=True
+    )
 
     return_values_unique = []
     seen_values = set()
@@ -127,5 +125,5 @@ def search_json(phrase, splits, p, max_values=10, threshold=0.5):
 
     return_values = return_values_unique[:max_values]
     # return_values = sorted(return_values, key=lambda item: item[1]["data"]["FREQ"], reverse=True)
-    
+
     return json.dumps(return_values)
