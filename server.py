@@ -69,7 +69,7 @@ if __name__ == "__main__":
                 self.end_headers()
                 search_terms = parse.unquote(self.path[1:])
                 self.wfile.write(
-                    bytes(autocomplete.search_json(search_terms, splits, p), "utf-8")
+                    bytes(autocomplete.search_json(search_terms.lower().strip(), splits, p), "utf-8")
                 )
 
         # Override the signal for SIGINT (ctrl+c on command line) to gracefully shut down server
