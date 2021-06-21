@@ -17,6 +17,9 @@ returns: floating point number between 0 and 1
 
 
 def similar(a, b):
+    if (not b.startswith(a[:len(a)//2+1])) or len(b) < len(a):
+        return 0
+    
     return SequenceMatcher(None, a, b).ratio()
 
 
@@ -30,9 +33,14 @@ returns: floating point number between 0 and 1
 
 
 def match_terms(a, b, threshold):
-    if similar(a.split()[0], b.split()[0]) < 0.9:
-        return 0
     matches = 0
+    firstword = a.split()[0]
+    firstword_match = False
+    for word_b in b.split():
+        if similar(firstword, word_b) >= threshold:
+            firstword_match = True
+    if not firstword_match:
+        return 0
     words_a = set(a.split())  # Using sets to remove duplicate words
     words_b = set(b.split())
     for word_a in words_a:
@@ -41,7 +49,7 @@ def match_terms(a, b, threshold):
             similarity = similar(word_a, word_b)
             best = max(best, similarity)
         if best > threshold:
-            matches += best
+            matches += 1
     return matches / max(len(words_a), len(words_b))
 
 
@@ -61,23 +69,24 @@ def search_helper(arguments):
 
     for index, row in dataset.iterrows():
         # First, clean up both the terms and the phrase
-        comparison_terms = row["TERM_REDUCED"].lower().strip()
-        comparison_phrase = row["PHRASE"].lower().strip()
+        comparison_terms = row["TERM_REDUCED"]
+        comparison_phrase = row["PHRASE"]
         # Then, find the highest similarity between the search phrase and the comparison data
         # (match_terms for analyzing terms like keywords, and similar for matching whole phrases)
-        similarity = max(
-            match_terms(phrase.lower(), comparison_terms, threshold),
-            similar(phrase, comparison_phrase),
-        )
-        # Safeguard in case the phrase has already been seen before
+        # similarity = max(
+        #     match_terms(phrase, comparison_terms, threshold),
+        #     match_terms(phrase, comparison_phrase, threshold)
+        # )
+        similarity = match_terms(phrase, comparison_terms, threshold)
+        
         if (
-            not comparison_phrase in similarity_matrix.keys()
-        ) or similarity > similarity_matrix[comparison_phrase]["similarity"]:
+            not comparison_terms in similarity_matrix.keys()
+        ) or similarity > similarity_matrix[comparison_terms]["similarity"]:
 
-            similarity_matrix[comparison_phrase] = {
+            similarity_matrix[comparison_terms] = {
                 "similarity": similarity,
                 "data": dict(row),
-                "rank": (similarity ** 3) * row["FREQ"],
+                "rank": (similarity ** 2) * row["FREQ"],
             }
 
     # Sort the similarity matrix from highest to lowest
@@ -124,6 +133,18 @@ def search_json(phrase, splits, p, max_values=10, threshold=0.5):
             seen_values.add(rv[0])
 
     return_values = return_values_unique[:max_values]
+
+    return_values_reordered = []
+    for rv in return_values:
+        words_a = phrase.split()
+        words_b = set(rv[1]["data"]["TERM_REDUCED"].split())
+        for word_a in words_a:
+            if word_a in words_b:
+                words_b.remove(word_a)
+        return_values_reordered.append((" ".join(words_a + list(words_b)), rv[1]))
+    
     # return_values = sorted(return_values, key=lambda item: item[1]["data"]["FREQ"], reverse=True)
 
-    return json.dumps(return_values)
+    return json.dumps(return_values_reordered)
+    # print(return_values)
+    # return json.dumps(return_values)
