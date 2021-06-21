@@ -12,3 +12,5 @@ TIME = True
 
 WRITER = ExpandedWriter
 DOCUMENT_SOURCE = JSONSource
+
+STOP_POS_TAGS = ["VERB"]

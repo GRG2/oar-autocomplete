@@ -29,7 +29,10 @@ class JSONSource(DocumentSource):
             ]
             topics = []
             for topic in document["topic"]:
-                topics.append(topic["tag"])
+                if ":" in topic["tag"]:
+                    topics.append(topic["tag"].split(":")[1])
+                else:
+                    topics.append(topic["tag"])
             sections.append(Section(name="Topics", content=". ".join(topics)))
             if "theme" in document.keys():
                 sections.append(Section(name="Theme", content=". ".join(document["theme"])))
