@@ -168,7 +168,7 @@
             text.appendChild(document.createTextNode(array[i][0]));
             sim.appendChild(document.createTextNode(Math.round(array[i][1]['similarity'] * 100) + "%"));
             freq.appendChild(document.createTextNode(Math.round(array[i][1]['data']['FREQ'])));
-            rank.appendChild(document.createTextNode(Math.round(array[i][1]['rank'])));
+            rank.appendChild(document.createTextNode(Math.round(array[i][1]['rank']*100)/100));
 
             text_div.appendChild(text);
             sim_div.appendChild(sim);
