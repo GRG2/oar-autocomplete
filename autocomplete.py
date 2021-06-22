@@ -41,6 +41,7 @@ def match_terms(a, b, threshold):
             firstword_match = True
     if not firstword_match:
         return 0
+
     words_a = set(a.split())  # Using sets to remove duplicate words
     words_b = set(b.split())
     for word_a in words_a:
@@ -49,7 +50,7 @@ def match_terms(a, b, threshold):
             similarity = similar(word_a, word_b)
             best = max(best, similarity)
         if best > threshold:
-            matches += 1
+            matches += best
     return matches / max(len(words_a), len(words_b))
 
 
@@ -138,10 +139,12 @@ def search_json(phrase, splits, p, max_values=10, threshold=0.5):
     for rv in return_values:
         words_a = phrase.split()
         words_b = set(rv[1]["data"]["TERM_REDUCED"].split())
+        good_words = []
         for word_a in words_a:
             if word_a in words_b:
                 words_b.remove(word_a)
-        return_values_reordered.append((" ".join(words_a + list(words_b)), rv[1]))
+                good_words.append(word_a)
+        return_values_reordered.append((" ".join(good_words + list(words_b)), rv[1]))
     
     # return_values = sorted(return_values, key=lambda item: item[1]["data"]["FREQ"], reverse=True)
 

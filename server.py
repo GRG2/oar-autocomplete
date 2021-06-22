@@ -31,6 +31,12 @@ import pandas
 
 import autocomplete
 
+# In case the better regex library is not available, use the standard library regex
+try:
+    import regex as re
+except:
+    import re
+
 # We only want to run the majority of this code once
 # Multiprocessing will run anything not in main as many times as it creates processes
 # So this is the basic protection against that issue
@@ -67,9 +73,10 @@ if __name__ == "__main__":
                 self.send_header("Content-type", "text/json")
                 self.send_header("Access-Control-Allow-Origin", "*")
                 self.end_headers()
-                search_terms = parse.unquote(self.path[1:])
+                search_terms = parse.unquote(self.path[1:]).lower().strip()
+                search_terms = re.sub(r'[^a-z]', ' ', search_terms)
                 self.wfile.write(
-                    bytes(autocomplete.search_json(search_terms.lower().strip(), splits, p), "utf-8")
+                    bytes(autocomplete.search_json(search_terms, splits, p), "utf-8")
                 )
 
         # Override the signal for SIGINT (ctrl+c on command line) to gracefully shut down server
