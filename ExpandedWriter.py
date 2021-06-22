@@ -12,7 +12,7 @@ chars_to_remove = ['.', ',', ';', '!', '?', '[', ']', '{', '}']
 chars_to_replace_with_space = ['_', '/', r'\s+', ':']
 
 
-MAX_TERMS = 3
+MAX_TERMS = 5
 
 class ExpandedWriter(Writer):
 
@@ -61,8 +61,8 @@ class ExpandedWriter(Writer):
                 freq[term.representation] = 1
         
         for representation, term in collected_terms.items():
-            if freq[representation] < 2:
-                continue
+            # if freq[representation] < 2:
+            #     continue
             words = str(list(term.phrases)[0]).split()
             if len(words) > MAX_TERMS:
                 continue
