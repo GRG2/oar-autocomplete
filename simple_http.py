@@ -25,3 +25,5 @@ while True:
             httpd.serve_forever()
     except KeyboardInterrupt:
         break
+    except:
+        pass

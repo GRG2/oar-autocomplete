@@ -42,7 +42,7 @@
             border: 0px;
             font-size: 36px;
             background-color: rgb(233, 233, 233);
-            flex: 5;
+            flex: 7;
         }
 
         #search_button {
@@ -50,7 +50,7 @@
             border: 0px;
             outline: 0px;
             background-color: rgb(233, 233, 233);
-            flex: 3;
+            flex: 1;
         }
 
         #search_button:hover {
@@ -106,6 +106,14 @@
     </div>
 </body>
 <script>
+    types = {
+        "Description": "description",
+        "Topics": "topic.tag",
+        "Title": "title",
+        "Keywords": "keyword",
+        "Author": "authors.fn"
+    }
+
     document.getElementById("q").addEventListener("keydown",
         function check_enter(e) {
             if (e.keyCode == 13) {
@@ -114,8 +122,8 @@
         });
 
     function redirect() {
-        q = document.getElementById("q").value;
-        window.location.href = "https://data.nist.gov/sdp/#/search?q=" + q;
+        q = document.getElementById("q");
+        window.location.href = "https://data.nist.gov/sdp/#/search?q=" + q.value;
     }
 
     function rgb(r, g, b) {
@@ -165,7 +173,8 @@
             var freq = document.createElement('p');
             var rank = document.createElement('p');
 
-            text.appendChild(document.createTextNode(array[i][0]));
+            text.innerHTML = "<b>"+array[i][0]+"</b>" + " in " + array[i][1]["data"]["SECTION"];
+            // text.appendChild(document.createTextNode(array[i][0]));
             sim.appendChild(document.createTextNode(Math.round(array[i][1]['similarity'] * 100) + "%"));
             freq.appendChild(document.createTextNode(Math.round(array[i][1]['data']['FREQ'])));
             rank.appendChild(document.createTextNode(Math.round(array[i][1]['rank']*100)/100));
@@ -184,7 +193,16 @@
 
             link.appendChild(div);
 
-            link.href = "https://data.nist.gov/sdp/#/search?q=" + array[i][0];
+            link.onclick = function(e) {
+                q = document.getElementById("q");
+                suggestion = e.srcElement.parentElement.parentElement.firstChild.innerText;
+                current_search = q.value.split(', ');
+                suggested_word = suggestion.split(/ in \s*/)[0];
+                suggested_section = suggestion.split(/ in \s*/)[1]
+                current_search[current_search.length - 1] = types[suggested_section] + '="' + suggested_word + '"'
+                q.value = current_search.join(", ") + ", ";
+                q.focus();
+            }
 
             sim_div.style.backgroundColor = rgb(100 + 155 * array[i][1]["similarity"], 100, 100);
             freq_div.style.backgroundColor = rgb(100, 100 + 25 * array[i][1]["data"]["FREQ"], 100);
@@ -207,7 +225,8 @@
         if (terms != oldterms && old_finished) {
             old_finished = false;
             var req = new XMLHttpRequest();
-            req.open("GET", "http://localhost:8000/" + terms, true);
+            var splits = terms.split(",")
+            req.open("GET", "http://localhost:8000/" + splits[splits.length - 1], true);
             req.onload = function (e) {
                 response = JSON.parse(req.responseText);
                 search_results = document.getElementById("search_results");

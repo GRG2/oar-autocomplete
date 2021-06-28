@@ -47,17 +47,23 @@ if __name__ == "__main__":
 
     # Read in CSV file from parmenides
     print("Reading file...")
-    results = pandas.read_csv("parmenides_results.csv")
-    len_results = len(results)
-    print("File read. Results:", len_results)
+    parmenides_results = pandas.read_csv("parmenides_results.csv")
+    other_results = pandas.read_csv("parsed.csv")
+    len_parmenides_results = len(parmenides_results)
+    len_other_results = len(other_results)
+    print("File read. Results:", len_parmenides_results + len_other_results)
 
     splits = []  # The smaller datasets used by each process
 
     # Each dataset is roughly the same size.
-    for i in range(NUM_THREADS):
-        start = int(i * len_results / NUM_THREADS)
-        end = int((i + 1) * len_results / NUM_THREADS)
-        splits.append(results[start:end])
+    for i in range(NUM_THREADS//2):
+        start = int(i * len_parmenides_results / NUM_THREADS)
+        end = int((i + 1) * len_parmenides_results / NUM_THREADS)
+        splits.append(parmenides_results[start:end])
+
+        start = int(i * len_other_results / NUM_THREADS)
+        end = int((i + 1) * len_other_results / NUM_THREADS)
+        splits.append(other_results[start:end])
 
     print("Created datasets for process pool")
 
@@ -74,7 +80,7 @@ if __name__ == "__main__":
                 self.send_header("Access-Control-Allow-Origin", "*")
                 self.end_headers()
                 search_terms = parse.unquote(self.path[1:]).lower().strip()
-                search_terms = re.sub(r'[^a-z]', ' ', search_terms)
+                search_terms = re.sub(r'[^a-z0-9]', ' ', search_terms)
                 self.wfile.write(
                     bytes(autocomplete.search_json(search_terms, splits, p), "utf-8")
                 )

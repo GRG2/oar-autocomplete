@@ -1,4 +1,3 @@
-
 from parmenides.conf import settings
 from parmenides.write import Writer
 
@@ -11,7 +10,7 @@ except:
 chars_to_remove = ['.', ',', ';', '!', '?', '[', ']', '{', '}']
 chars_to_replace_with_space = ['_', '/', r'\s+', ':']
 
-
+MIN_FREQ = 1
 MAX_TERMS = 5
 
 class ExpandedWriter(Writer):
@@ -23,6 +22,7 @@ class ExpandedWriter(Writer):
             'TERM_REDUCED',
             'PHRASE',
             'DOCUMENT',
+            'SECTION',
             'FREQ'
         ] + settings.CSV_EXTRA_COLUMNS
 
@@ -46,9 +46,10 @@ class ExpandedWriter(Writer):
 
         collected_terms = {}
         freq = {}
-
+        
         for tree in trees:
             term = tree.term
+            term.section = tree.section
             if term.representation in collected_terms:
                 collected_terms[term.representation].phrases |= \
                     term.phrases
@@ -61,8 +62,8 @@ class ExpandedWriter(Writer):
                 freq[term.representation] = 1
         
         for representation, term in collected_terms.items():
-            # if freq[representation] < 2:
-            #     continue
+            if freq[representation] < MIN_FREQ:
+                continue
             words = str(list(term.phrases)[0]).split()
             if len(words) > MAX_TERMS:
                 continue
@@ -79,6 +80,7 @@ class ExpandedWriter(Writer):
                 'TERM_REDUCED': " ".join(list(set(re.split(r':\d:', str(representation))))).lower().strip(),
                 'PHRASE': self.remove_unwanted(str(list(term.phrases)[0])).lower().strip(),
                 'DOCUMENT': document.identifier,
+                'SECTION': term.section,
                 'FREQ': freq[representation]
             }
             for column_name in settings.CSV_EXTRA_COLUMNS:

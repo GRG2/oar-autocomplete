@@ -24,18 +24,8 @@ class JSONSource(DocumentSource):
         for document in cls.json_obj:
             sections = [
                 Section(name="Description", content=" ".join(document["description"])),
-                Section(name="Keywords", content=". ".join(document["keyword"])),
                 Section(name="Title", content=document["title"])
             ]
-            topics = []
-            for topic in document["topic"]:
-                if ":" in topic["tag"]:
-                    topics.append(topic["tag"].split(":")[1])
-                else:
-                    topics.append(topic["tag"])
-            sections.append(Section(name="Topics", content=". ".join(topics)))
-            if "theme" in document.keys():
-                sections.append(Section(name="Theme", content=". ".join(document["theme"])))
             title = document["title"]
 
             yield Document(
